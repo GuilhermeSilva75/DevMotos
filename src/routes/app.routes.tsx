@@ -1,31 +1,33 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Login from "../pages/login";
-import Register from "../pages/register";
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Home from '../pages/home';
+import Favorites from '../pages/favorites';
 
-export type StackParamList = {
-    Login: undefined
-    Register: undefined
+export type TabParamList = {
+    Home: undefined
+    Favorites: undefined
 }
 
-const Stack = createNativeStackNavigator<StackParamList>()
+const Tab = createBottomTabNavigator<TabParamList>()
 
-export default function Routes() {
+
+export default function AppRoutes() {
     return (
-        <Stack.Navigator
-        screenOptions={{
-           headerShown: false 
-        }}
-        >
-            
-            <Stack.Screen
-                name="Login"
-                component={Login}
+        <Tab.Navigator>
+            <Tab.Screen
+                name='Home'
+                component={Home}
+                options={{
+                    headerShown: false
+                }}
             />
 
-            <Stack.Screen
-                name="Register"
-                component={Register}
+            <Tab.Screen
+                name='Favorites'
+                component={Favorites}
+                options={{
+                    headerShown: false
+                }}
             />
-        </Stack.Navigator>
+        </Tab.Navigator>
     );
 }
