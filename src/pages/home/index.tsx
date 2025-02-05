@@ -1,14 +1,17 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { useContext } from 'react';
-import { AuthContext } from '../../Context/AuthContext';
+
+import Header from '../../component/Header';
+import Input from '../../component/Input';
 
 export default function Home() {
-
-  const { user } = useContext(AuthContext)
-
   return (
     <View style={styles.container}>
-      <Text>{user?.name}</Text>
+      <Header/>
+      
+      <Input
+      placeholder='Procurando alguma moto?'
+      
+      />
     </View>
   );
 }
@@ -16,7 +19,6 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center'
+    paddingHorizontal: 16
   }
 })

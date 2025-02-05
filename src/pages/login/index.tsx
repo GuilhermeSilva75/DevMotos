@@ -9,7 +9,6 @@ import { StackParamList } from '../../routes/auth.routes';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../services/firebaseConnectionn';
 
-import AppRoutes from '../../routes/app.routes';
 
 import InputLogin from '../../component/inputLogin';
 
@@ -34,7 +33,7 @@ export default function Login() {
         await signInWithEmailAndPassword(auth, data.email, data.password)
             .then((user) => {
                 navigation.navigate('AppRoutes')
-                
+
             })
             .catch((error) => {
                 console.log(error);

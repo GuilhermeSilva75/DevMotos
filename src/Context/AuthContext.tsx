@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useState, useEffect } from "react";
+import { Alert } from "react-native";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../services/firebaseConnectionn";
 
@@ -11,6 +12,7 @@ export type AuthContextData = {
     signed: boolean
     loadinAuth: boolean
     user: UserProps | null
+    handleInfo: ({ name, email, uid }: UserProps) => void
 }
 
 interface UserProps {
@@ -27,32 +29,45 @@ function AuthProvider({ children }: AuthProviderProps) {
     const [loadinAuth, setLoadingAuth] = useState(true)
 
     useEffect(() => {
-        const unsub = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                setUser({
-                    uid: user.uid,
-                    name: user?.displayName,
-                    email: user?.email
-                })
+        async function onSubUser() {
+            await onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    setUser({
+                        email: user.email,
+                        name: user.displayName,
+                        uid: user.uid
+                    })
+                    setLoadingAuth(false)
+                    // Alert.alert('Chamou')
 
-                setLoadingAuth(false)
-            } else {
-                setUser(null)
-                setLoadingAuth(false)
-            }
-        })
+                } else {
 
-        return () => {
-            unsub()
+                    // Alert.alert('Chamou')
+                    setUser(null)
+                    setLoadingAuth(false)
+                }
+            })
         }
+
+        onSubUser()
+
     }, [])
+
+    function handleInfo({ name, email, uid }: UserProps) {
+        setUser({
+            name,
+            email,
+            uid
+        })
+    }
 
     return (
         <AuthContext.Provider
             value={{
                 signed: !!user,
                 loadinAuth,
-                user
+                user,
+                handleInfo
             }}
         >
             {children}

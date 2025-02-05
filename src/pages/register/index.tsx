@@ -2,11 +2,17 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { StackParamList } from '../../routes/auth.routes';
 
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+
+
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../../services/firebaseConnectionn';
 
 import InputLogin from '../../component/inputLogin';
+import { useNavigation } from '@react-navigation/native';
+
 const schema = z.object({
     email: z.string().email("Insira um email valido").nonempty('Email Obrigatório'),
     password: z.string().nonempty("Senha Obrigatório"),
@@ -21,11 +27,16 @@ export default function Register() {
         mode: 'onSubmit',
     })
 
+    
+    const navigation = useNavigation<NativeStackNavigationProp<StackParamList>>()
+
     async function hanldeCreate(data: FormData) {
         await createUserWithEmailAndPassword(auth, data.email, data.password)
-            .then(() => {
-                console.log('criou');
-                
+            .then(async (user) => {
+                await updateProfile(user.user, {
+                    displayName: data.name
+                })
+                navigation.navigate('AppRoutes')
             })
             .catch((error) => {
                 console.log(error);
