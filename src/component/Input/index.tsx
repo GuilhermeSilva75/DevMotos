@@ -1,11 +1,17 @@
 import { Text, TextInput, TextInputProps, View, StyleSheet, TouchableOpacity } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { HomeParamList } from "../../routes/home.routes";
 
 type Props = {
     error?: string
 } & TextInputProps
 
 export default function Input({ children, error, ...rest }: Props) {
+
+    const navigation = useNavigation<NativeStackNavigationProp<HomeParamList>>()
+
     return (
         <View style={styles.container}>
             <TextInput
@@ -13,7 +19,7 @@ export default function Input({ children, error, ...rest }: Props) {
                 {...rest}
             />
 
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Newmoto')}>
                 <AntDesign name="plus" size={24} color="white" />
             </TouchableOpacity>
         </View>
@@ -24,7 +30,7 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         justifyContent: 'space-between',
-        
+
     },
     input: {
         backgroundColor: "transparent",

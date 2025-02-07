@@ -1,14 +1,15 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Home from '../pages/home';
 import Favorites from '../pages/favorites';
 import Perfil from '../pages/perfil';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Feather from '@expo/vector-icons/Feather';
+import { HomeStack } from './home.routes';
+
 
 export type TabParamList = {
-    Home: undefined
     Favorites: undefined
     Perfil: undefined
+    HomeStack: undefined
 }
 
 const Tab = createBottomTabNavigator<TabParamList>()
@@ -28,8 +29,8 @@ export default function AppRoutes() {
         }}
         >
             <Tab.Screen
-                name='Home'
-                component={Home}
+                name='HomeStack'
+                component={HomeStack}
                 options={{
                     tabBarIcon: (({color, size}) => {
                         return <FontAwesome name="home" size={size} color={color} />

@@ -1,12 +1,13 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Login from "../pages/login";
 import Register from "../pages/register";
-import AppRoutes from "./app.routes";
+
 
 export type StackParamList = {
     Login: undefined
     Register: undefined
     AppRoutes: undefined
+    Newmoto: undefined
 }
 
 const Stack = createNativeStackNavigator<StackParamList>()
@@ -26,14 +27,6 @@ export default function AuthRoutes() {
             <Stack.Screen
                 name="Register"
                 component={Register}
-            />
-
-            <Stack.Screen
-                name="AppRoutes"
-                component={AppRoutes}
-                options={{
-                    headerShown: false
-                }}
             />
         </Stack.Navigator>
     );
