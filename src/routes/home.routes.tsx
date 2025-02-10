@@ -11,15 +11,14 @@ const Stack = createNativeStackNavigator<HomeParamList>()
 
 export function HomeStack() {
     return(
-        <Stack.Navigator
-        screenOptions={{
-            headerShown: false
-        }}
-        >
+        <Stack.Navigator>
 
             <Stack.Screen
             name="Home"
             component={Home}
+            options={{
+                headerShown: false
+            }}
             />
 
 

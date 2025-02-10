@@ -5,7 +5,7 @@ import Feather from '@expo/vector-icons/Feather';
 
 export default function Perfil() {
 
-  const { user } = useContext(AuthContext)
+  const { user, LogOut } = useContext(AuthContext)
 
   return (
     <View style={styles.container}>
@@ -15,7 +15,7 @@ export default function Perfil() {
 
       <Text style={styles.text}>Olá, {user?.name}</Text>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={() => LogOut()}>
         <Text style={{fontSize: 20, fontWeight: 'bold', color: 'white'}}>Sair dessa conta</Text>
       </TouchableOpacity>
     </View>

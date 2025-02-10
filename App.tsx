@@ -3,7 +3,6 @@ import { Routes } from "./src/routes";
 
 import AuthProvider from "./src/Context/AuthContext";
 
-
 export default function App() {
   return (
     <NavigationContainer>

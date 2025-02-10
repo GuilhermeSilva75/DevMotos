@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useState, useEffect } from "react";
 import { Alert } from "react-native";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../services/firebaseConnectionn";
 
 
@@ -13,6 +13,7 @@ export type AuthContextData = {
     loadinAuth: boolean
     user: UserProps | null
     handleInfo: ({ name, email, uid }: UserProps) => void
+    LogOut: () => void
 }
 
 interface UserProps {
@@ -29,29 +30,30 @@ function AuthProvider({ children }: AuthProviderProps) {
     const [loadinAuth, setLoadingAuth] = useState(true)
 
     useEffect(() => {
-        async function onSubUser() {
-            await onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    setUser({
-                        email: user.email,
-                        name: user.displayName,
-                        uid: user.uid
-                    })
-                    setLoadingAuth(false)
-                    // Alert.alert('Chamou')
 
-                } else {
-
-                    // Alert.alert('Chamou')
-                    setUser(null)
-                    setLoadingAuth(false)
-                }
+        const unsub = onAuthStateChanged(auth, (user) => {
+          if(user){
+            setUser({
+              uid: user.uid,
+              name: user?.displayName,
+              email: user?.email
             })
+    
+            setLoadingAuth(false);
+    
+          }else{
+            setUser(null);
+            setLoadingAuth(false);
+          }
+    
+    
+        })
+    
+        return () => {
+          unsub();
         }
-
-        onSubUser()
-
-    }, [])
+    
+      }, [])
 
     function handleInfo({ name, email, uid }: UserProps) {
         setUser({
@@ -61,13 +63,18 @@ function AuthProvider({ children }: AuthProviderProps) {
         })
     }
 
+    function LogOut() {
+        signOut(auth)
+    }
+
     return (
         <AuthContext.Provider
             value={{
                 signed: !!user,
                 loadinAuth,
                 user,
-                handleInfo
+                handleInfo,
+                LogOut
             }}
         >
             {children}
