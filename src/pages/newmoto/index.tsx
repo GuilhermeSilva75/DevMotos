@@ -1,12 +1,18 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { useState, useContext } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, Alert } from 'react-native';
 import Feather from '@expo/vector-icons/Feather';
 import * as ImagePicker from 'expo-image-picker';
+import { AuthContext } from '../../Context/AuthContext';
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { ref, uploadBytes } from 'firebase/storage'
+import { addDoc, collection } from 'firebase/firestore'
+
+import { Storage, db } from '../../services/firebaseConnectionn'
 import InputForm from '../../component/InputForm';
 
+import ModalForm from '../../component/ModalForm';
 
 const schema = z.object({
     name: z.string().nonempty('O campo nome é obrigatorio'),
@@ -25,12 +31,16 @@ type FormData = z.infer<typeof schema>
 
 export default function Newmoto() {
 
-    const { handleSubmit, formState: { errors }, control } = useForm<FormData>({
+    const { handleSubmit, formState: { errors }, control, reset } = useForm<FormData>({
         resolver: zodResolver(schema),
         mode: 'onChange'
     })
 
-    const [imageUri, setimageUri] = useState<string | null>()
+    const { user } = useContext(AuthContext)
+
+    const [imageUri, setimageUri] = useState<string | null>(null)
+    const [modalVisible, setModalVisible] = useState(false)
+
 
     async function PickImage() {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -43,8 +53,68 @@ export default function Newmoto() {
         if (!result.canceled && result.assets && result.assets[0].uri) {
             const selectedUri = result.assets[0].uri
             setimageUri(selectedUri)
+            await uploadImage(selectedUri)
         }
 
+    }
+
+    async function uploadImage(uri: string) {
+        if (!uri) {
+            Alert.alert("Selecione alguma imagem")
+            return
+        }
+
+        const curretUid = user?.uid
+        const fileName = uri.split('/').pop()
+        const storageRef = ref(Storage, `images/${curretUid}/${fileName}`)
+
+        try {
+            const response = await fetch(uri)
+            const blob = await response.blob()
+
+            await uploadBytes(storageRef, blob)
+
+        } catch (error) {
+            console.log(error);
+
+        }
+
+    }
+
+    function onSubmit(data: FormData) {
+        if (imageUri?.length === 0) {
+            Alert.alert('Envie alguma imagem')
+            return
+        }
+
+        addDoc(collection(db, "motos"), {
+            name: data.name,
+            model: data.model,
+            city: data.city,
+            whatsapp: data.whatsapp,
+            km: data.km,
+            price: data.price,
+            descripition: data.descripition,
+            year: data.year,
+            created: new Date(),
+            owner: user?.name,
+            images: imageUri
+        })
+            .then(() => {
+                reset()
+                setimageUri(null)
+                console.log("Cadastrado");
+
+            })
+            .catch((error) => {
+                console.log(error);
+                console.log("Erro ao cadastrar");
+            })
+    }
+
+    async function handldeDelete() {
+        setimageUri(null)
+        setModalVisible(false)
     }
 
     return (
@@ -54,13 +124,17 @@ export default function Newmoto() {
                     <Feather name="camera" size={24} color="black" />
                 </TouchableOpacity>
 
-                {imageUri && (
-                    <Image
-                        source={{ uri: imageUri }}
-                        style={{ width: "69%", height: 100, borderRadius: 12, position: 'relative' }}
-                        resizeMode='cover'
-                    />
-                )}
+                <TouchableOpacity onPress={() => setModalVisible(true)}
+                    style={{ width: "100%", height: 100, borderRadius: 12, position: 'relative' }}
+                >
+                    {imageUri && (
+                        <Image
+                            source={{ uri: imageUri }}
+                            style={{ width: "69%", height: 100, borderRadius: 12, position: 'relative' }}
+                            resizeMode='cover'
+                        />
+                    )}
+                </TouchableOpacity>
             </View>
 
             <View style={styles.inputArea}>
@@ -155,6 +229,7 @@ export default function Newmoto() {
                     name='city'
                     render={({ field: { onChange, onBlur, value } }) => (
                         <InputForm
+                            placeholder='Ex: Salvador...'
                             value={value}
                             onChangeText={onChange}
                             onBlur={onBlur}
@@ -240,6 +315,14 @@ export default function Newmoto() {
                         />
                     )}
                 />
+
+                <TouchableOpacity style={styles.btnLogin} onPress={handleSubmit(onSubmit)}>
+                    <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>Acessar</Text>
+                </TouchableOpacity>
+
+                <Modal animationType='fade' transparent={false} visible={modalVisible}>
+                    <ModalForm imageUri={imageUri} onCloseModal={() => setModalVisible(false)} deleteImage={handldeDelete} />
+                </Modal>
             </View>
         </ScrollView>
     );
@@ -282,5 +365,15 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#000000bc',
         paddingBottom: 5
+    },
+    btnLogin: {
+        height: 45,
+        width: '100%',
+        marginTop: 14,
+        padding: 8,
+        backgroundColor: "#000",
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center'
     }
 })
