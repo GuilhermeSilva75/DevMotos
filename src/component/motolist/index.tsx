@@ -7,10 +7,12 @@ import { HomeParamList } from '../../routes/home.routes';
 interface MotoItemProps {
     data: MotosProps
     DimensionValue: DimensionValue
+    enableRemove?: boolean
+    removeItem?: () => Promise<void>
 }
 
 
-export default function MotoItem({ data, DimensionValue }: MotoItemProps) {
+export default function MotoItem({ data, DimensionValue, enableRemove = false, removeItem }: MotoItemProps) {
 
     const navigation = useNavigation<NativeStackNavigationProp<HomeParamList>>()
 
@@ -18,8 +20,18 @@ export default function MotoItem({ data, DimensionValue }: MotoItemProps) {
         navigation.navigate('Details', {id: data.id})
     }
 
+    async function handleRemove() {
+        if(!removeItem) return
+
+        await removeItem();
+    }
+
     return (
-        <Pressable style={[styles.container, { width: DimensionValue }]} onPress={handleNavigation}>
+        <Pressable 
+        style={[styles.container, { width: DimensionValue }]} 
+        onPress={handleNavigation}
+        onLongPress={enableRemove ? handleRemove : () => {}}
+        >
             <Image
                 style={styles.cover}
                 source={{ uri: data.images }}

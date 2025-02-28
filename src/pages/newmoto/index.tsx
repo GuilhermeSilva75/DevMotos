@@ -317,7 +317,7 @@ export default function Newmoto() {
                 />
 
                 <TouchableOpacity style={styles.btnLogin} onPress={handleSubmit(onSubmit)}>
-                    <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>Acessar</Text>
+                    <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>Cadastrar</Text>
                 </TouchableOpacity>
 
                 <Modal animationType='fade' transparent={false} visible={modalVisible}>

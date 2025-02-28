@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Pressable, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Pressable, ScrollView, Image, Modal } from 'react-native';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MotoDetailProps } from '../../types/moto.type';
@@ -7,9 +7,12 @@ import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../../services/firebaseConnectionn';
 import { HomeParamList } from '../../routes/home.routes';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Linking from 'expo-linking'
 
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
+import ModalDetail from './Modal';
+import useStorage from '../../hooks/useStorage';
 
 type RouteDetailParams = {
     detail: {
@@ -26,6 +29,8 @@ export default function Details() {
 
     const [moto, setMoto] = useState<MotoDetailProps>()
     const [loading, setLoading] = useState(true)
+    const [modalVisible, setModalVisible] = useState(false)
+    const { saveItem } = useStorage()
 
     const navigation = useNavigation<NativeStackNavigationProp<HomeParamList>>()
 
@@ -66,6 +71,19 @@ export default function Details() {
         loadMotos()
     }, [route.params.id])
 
+    async function handleCallPhone() {
+        await Linking.openURL(`tel:${moto?.whatsapp}`)
+    }
+
+
+    async function handleFavorite() {
+        if(!moto) return        
+        await saveItem(moto)    
+        console.log("Favoritado com sucesso");
+        
+    }
+
+
     if (loading) {
         return (
             <SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -81,16 +99,23 @@ export default function Details() {
             <SafeAreaView>
                 <View style={styles.container}>
                     <View style={styles.AreaIcon}>
-                        <Pressable style={styles.button}>
+                        <Pressable style={[styles.button, { marginRight: 260 }]} onPress={() => navigation.goBack()}>
                             <AntDesign name="arrowleft" size={24} color="white" />
+                        </Pressable>
+
+                        <Pressable style={styles.button} onPress={handleFavorite}>
+                            <Feather name="bookmark" size={24} color="white" />
                         </Pressable>
                     </View>
 
-                    <Image
-                        source={{ uri: moto?.images }}
-                        style={{ height: 250, width: '100%', borderRadius: 12 }}
-                        resizeMode='cover'
-                    />
+                    <Pressable onPress={() => setModalVisible(true)}>
+                        <Image
+                            source={{ uri: moto?.images }}
+                            style={{ height: 250, width: '100%', borderRadius: 12 }}
+                            resizeMode='cover'
+                        />
+
+                    </Pressable>
 
                     <View style={styles.header}>
                         <Text style={styles.title}>{moto?.name}</Text>
@@ -135,11 +160,15 @@ export default function Details() {
                         >{moto?.descripition}</Text>
                     </View>
 
-                    <Pressable style={styles.callButton}>
+                    <Pressable style={styles.callButton} onPress={handleCallPhone}>
                         <Text style={styles.callText}>Conversar com vendendor</Text>
                     </Pressable>
 
                 </View>
+
+                <Modal animationType='fade' transparent={false} visible={modalVisible}>
+                    <ModalDetail image={moto?.images} onCloseModal={() => setModalVisible(false)} />
+                </Modal>
             </SafeAreaView>
         </ScrollView>
     );
@@ -149,7 +178,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#F3F5F8",
-        paddingHorizontal: 10
+        paddingHorizontal: 8
     },
     AreaIcon: {
         flexDirection: 'row',
@@ -157,7 +186,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         zIndex: 99,
         top: 13,
-        left: 18
+        left: 16
 
     },
     button: {
