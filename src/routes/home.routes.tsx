@@ -25,7 +25,6 @@ export function HomeStack() {
                 }}
             />
 
-
             <Stack.Screen
                 name="Newmoto"
                 component={Newmoto}

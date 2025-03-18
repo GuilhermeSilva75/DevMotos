@@ -7,6 +7,7 @@ import { HomeParamList } from '../../routes/home.routes';
 
 import MotoItem from '../../component/motolist';
 import useStorage from '../../hooks/useStorage';
+import { useToast } from '../../hooks/useToast';
 
 import { MotosProps } from '../../types/moto.type';
 
@@ -17,6 +18,7 @@ export default function Favorites() {
   const [motos, setMotos] = useState<MotosProps[]>([])
   const { getItem, removeItem } = useStorage()
   const isFocused = useIsFocused()
+  const { showToast } = useToast()
 
   useEffect(() => {
     async function loadMotos() {
@@ -31,7 +33,8 @@ export default function Favorites() {
     const listMotos = await removeItem(id)
 
     setMotos(listMotos)
-    
+    showToast("Moto removida com sucesso!", 'DEFALT')
+
   }
 
   return (

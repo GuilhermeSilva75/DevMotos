@@ -13,6 +13,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
 import ModalDetail from './Modal';
 import useStorage from '../../hooks/useStorage';
+import { useToast } from '../../hooks/useToast';
 
 type RouteDetailParams = {
     detail: {
@@ -31,6 +32,7 @@ export default function Details() {
     const [loading, setLoading] = useState(true)
     const [modalVisible, setModalVisible] = useState(false)
     const { saveItem } = useStorage()
+    const { showToast } = useToast()
 
     const navigation = useNavigation<NativeStackNavigationProp<HomeParamList>>()
 
@@ -77,10 +79,10 @@ export default function Details() {
 
 
     async function handleFavorite() {
-        if(!moto) return        
-        await saveItem(moto)    
-        console.log("Favoritado com sucesso");
-        
+        if (!moto) return
+
+        await saveItem(moto)
+        showToast("Moto favoritada com sucesso!", 'SUCCESS')
     }
 
 
