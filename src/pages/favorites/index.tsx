@@ -53,6 +53,7 @@ export default function Favorites() {
           />
         )}
         contentContainerStyle={{ paddingBottom: 14 }}
+        ListEmptyComponent={ <Text style={{marginTop: 20, textAlign: 'center', fontSize: 16}}>Nenhuma moto favoritada!</Text>}
       />
     </SafeAreaView>
   );
