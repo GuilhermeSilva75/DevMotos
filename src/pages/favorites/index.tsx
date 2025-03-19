@@ -11,7 +11,7 @@ import { useToast } from '../../hooks/useToast';
 
 import { MotosProps } from '../../types/moto.type';
 
-export default function Favorites() {
+export default function Favoritos() {
 
 
   const navigation = useNavigation<NativeStackNavigationProp<HomeParamList>>()

@@ -13,7 +13,7 @@ export type HomeParamList = {
 
 const Stack = createNativeStackNavigator<HomeParamList>()
 
-export function HomeStack() {
+export function Inicio() {
     return (
         <Stack.Navigator>
 
