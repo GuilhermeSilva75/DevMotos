@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, FlatList, Keyboard } from 'react-native';
 import { db } from '../../services/firebaseConnectionn';
 import { collection, getDocs, orderBy, query, where } from 'firebase/firestore'
 import { MotosProps } from '../../types/moto.type';
@@ -51,6 +51,65 @@ export default function Home() {
       })
   }
 
+  const debounce = (func: (...args: string[]) => void, delay: number) => {
+    let timout: NodeJS.Timeout | null = null
+
+    return (...args: string[]) => {
+      if (timout) {
+        clearInterval(timout)
+      }
+
+      timout = setTimeout(() => {
+        func(...args)
+      }, delay)
+    }
+  }
+
+  function handleInputSearch(text: string) {
+    setSearchInput(text)
+    deleyedApiCall(text)
+  }
+
+  const deleyedApiCall = useCallback(
+    debounce(async (newText: string) => await fetchSearchBar(newText), 800),
+    []
+  )
+
+  async function fetchSearchBar(newText: string) {
+    if (newText === "") {
+      await loadMoto()
+      setSearchInput("")
+      return
+    }
+
+    setMotos([])
+
+    const q = query(collection(db, "motos"),
+      where("name" ,">=", newText.toUpperCase()),
+      where("name" ,"<=", newText.toUpperCase() + "\uf8ff")
+    )
+
+    const querySnapshot = await getDocs(q)
+
+    let listMotos = [] as MotosProps[]
+
+    querySnapshot.forEach((doc) => {
+      listMotos.push({
+        id: doc.id,
+        name: doc.data().name,
+        city: doc.data().city,
+        year: doc.data().year,
+        km: doc.data().km,
+        images: doc.data().images,
+        price: doc.data().price,
+        uid: doc.data().uid
+      })
+    })
+
+    setMotos(listMotos)
+    Keyboard.dismiss()
+  }
+
   return (
     <View style={styles.container}>
       <Header />
@@ -58,7 +117,7 @@ export default function Home() {
       <Input
         placeholder='Procurando alguma moto?'
         value={searchInput}
-        onChangeText={(text) => setSearchInput(text)}
+        onChangeText={(text) => handleInputSearch(text)}
       />
 
       {loading && (
@@ -68,12 +127,12 @@ export default function Home() {
       <FlatList
         data={motos}
         keyExtractor={(item) => item.id}
-        renderItem={({item}) => <MotoItem data={item} DimensionValue={ motos.length <= 1 ? '100%' : '49%'}/>}
+        renderItem={({ item }) => <MotoItem data={item} DimensionValue={motos.length <= 1 ? '100%' : '49%'} />}
         style={styles.list}
         showsVerticalScrollIndicator={false}
         numColumns={2}
-        columnWrapperStyle={{justifyContent: 'space-between'}}
-        contentContainerStyle={{paddingBottom: 14}}
+        columnWrapperStyle={{ justifyContent: 'space-between' }}
+        contentContainerStyle={{ paddingBottom: 14 }}
       />
     </View>
   );
