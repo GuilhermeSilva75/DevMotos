@@ -21,7 +21,7 @@ export default function Home() {
     }
 
     fetchMotos()
-  }, [])
+  }, [loadMoto])
 
   async function loadMoto() {
     const motosRef = collection(db, "motos")
